@@ -1,6 +1,6 @@
-# Flight Tracker - Roadmap Checklist
+# Airport Traffic Analytics - Roadmap Checklist
 
-Objectif du projet : construire un pipeline data engineering portfolio avec Airflow, Snowflake et dbt, en architecture Medallion Bronze / Silver / Gold.
+Objectif du projet : construire un pipeline data engineering portfolio pour analyser les arrivees et departs d'aeroports europeens avec Airflow, Snowflake et dbt, en architecture Medallion Bronze / Silver / Gold.
 
 Regle de travail : chaque case doit correspondre a une action que je comprends et que je peux refaire seul.
 
@@ -21,16 +21,16 @@ Regle de travail : chaque case doit correspondre a une action que je comprends e
 
 ## Phase 1 bis - Git et GitHub
 
-- [ ] Verifier que Git est installe
-- [ ] Configurer `user.name` et `user.email` Git si besoin
-- [ ] Initialiser le repository Git local
-- [ ] Verifier le statut avec `git status`
-- [ ] Creer un `.gitignore` avant le premier commit
-- [ ] Verifier que `.env`, `logs/` et fichiers temporaires ne seront pas suivis
-- [ ] Faire un premier commit propre
-- [ ] Creer un repository GitHub
-- [ ] Connecter le repository local au repository GitHub
-- [ ] Pousser le premier commit sur GitHub
+- [x] Verifier que Git est installe
+- [x] Configurer `user.name` et `user.email` Git si besoin
+- [x] Initialiser le repository Git local
+- [x] Verifier le statut avec `git status`
+- [x] Creer un `.gitignore` avant le premier commit
+- [x] Verifier que `.env`, `logs/` et fichiers temporaires ne seront pas suivis
+- [x] Faire un premier commit propre
+- [x] Creer un repository GitHub
+- [x] Connecter le repository local au repository GitHub
+- [x] Pousser le premier commit sur GitHub
 - [ ] Verifier sur GitHub qu'aucun secret n'est present
 
 ## Phase 2 - Airflow local
@@ -48,27 +48,34 @@ Regle de travail : chaque case doit correspondre a une action que je comprends e
 - [x] Lire les logs de la task dans l'interface Airflow
 - [x] Creer un DAG avec deux tasks reliees par une dependance
 - [x] Comprendre `task_1 >> task_2`
-- [x] Creer un DAG de test Flight Tracker avec trois tasks : start, extract, end
+- [x] Creer un DAG de test Airport Traffic avec trois tasks : start, extract, end
 - [x] Verifier le graph du DAG dans l'interface Airflow
 - [x] Verifier les logs des trois tasks
 - [ ] Revoir les noms de `dag_id` pour eviter les doublons
 - [ ] Comprendre la difference entre `Audit Log` et logs de task
 
-## Phase 3 - Ingestion API OpenSky
+## Phase 3 - Ingestion OpenSky Arrivals / Departures
 
 - [ ] Ajouter `requests` dans `requirements.txt`
 - [ ] Comprendre le role de `requests.get()`
-- [ ] Creer le fichier `dags/opensky_api_test_dag.py`
-- [ ] Creer une fonction `extract_opensky_data`
-- [ ] Appeler l'endpoint OpenSky depuis une task Airflow
+- [ ] Explorer la documentation OpenSky `arrivals by airport`
+- [ ] Explorer la documentation OpenSky `departures by airport`
+- [ ] Choisir un premier aeroport test avec code ICAO, par exemple `LFPG`
+- [ ] Choisir une fenetre de temps passee pour eviter les donnees non disponibles du jour
+- [ ] Comprendre les parametres `airport`, `begin`, `end`
+- [ ] Creer le fichier `dags/opensky_airport_traffic_test_dag.py`
+- [ ] Creer une fonction `extract_airport_arrivals`
+- [ ] Construire l'URL `/flights/arrival`
+- [ ] Appeler l'endpoint arrivals depuis une task Airflow
 - [ ] Verifier le code HTTP de la reponse
+- [ ] Gerer le cas HTTP `200`
+- [ ] Gerer le cas HTTP `404` comme absence possible de vols
 - [ ] Convertir la reponse en JSON
-- [ ] Identifier la cle `states`
-- [ ] Compter le nombre d'avions recuperes
+- [ ] Compter le nombre d'arrivees recuperees
 - [ ] Logger un resume clair dans Airflow
-- [ ] Gerer le cas ou l'API retourne une erreur
-- [ ] Gerer le cas ou `states` est vide ou absent
-- [ ] Ajouter un timeout a l'appel API
+- [ ] Tester une extraction departures avec `/flights/departure`
+- [ ] Comparer la structure des reponses arrivals et departures
+- [ ] Ajouter un timeout a chaque appel API
 - [ ] Tester le DAG depuis l'interface Airflow
 - [ ] Lire les logs de l'extraction
 
@@ -85,8 +92,8 @@ Regle de travail : chaque case doit correspondre a une action que je comprends e
 - [ ] Ajouter les variables Snowflake dans `.env.example` sans secrets
 - [ ] Installer/configurer le connecteur Snowflake Python
 - [ ] Tester une connexion Snowflake depuis Airflow
-- [ ] Creer une table Bronze pour stocker le JSON brut
-- [ ] Charger une reponse OpenSky brute dans Bronze
+- [ ] Creer une table Bronze pour stocker les reponses OpenSky brutes
+- [ ] Charger une reponse arrivals/departures brute dans Bronze
 - [ ] Ajouter un timestamp d'ingestion
 - [ ] Verifier les lignes dans Snowflake
 
@@ -107,7 +114,7 @@ Important : aucune transformation metier en Bronze.
 ## Phase 6 - Profilage / EDA leger
 
 - [ ] Extraire un echantillon de Bronze
-- [ ] Observer la structure des donnees OpenSky
+- [ ] Observer la structure des donnees OpenSky arrivals/departures
 - [ ] Identifier les champs importants
 - [ ] Mesurer les valeurs nulles
 - [ ] Identifier les types attendus
@@ -131,10 +138,12 @@ Important : aucune transformation metier en Bronze.
 
 ## Phase 8 - dbt Gold
 
-- [ ] Choisir 3 a 5 KPIs simples
+- [ ] Choisir 3 a 5 KPIs simples lies au trafic aeroportuaire
 - [ ] Creer un premier modele Gold agrege
-- [ ] Calculer le nombre d'avions par pays
-- [ ] Calculer des indicateurs par altitude ou zone
+- [ ] Calculer le nombre d'arrivees par aeroport et par jour
+- [ ] Calculer le nombre de departs par aeroport et par jour
+- [ ] Comparer arrivees vs departs
+- [ ] Identifier les callsigns les plus frequents
 - [ ] Ajouter des tests sur les modeles Gold
 - [ ] Documenter les modeles Gold
 - [ ] Verifier les couts des requetes Snowflake
@@ -153,6 +162,7 @@ Important : aucune transformation metier en Bronze.
 - [ ] Rediger un README clair
 - [ ] Ajouter un schema d'architecture
 - [ ] Expliquer les choix techniques
+- [ ] Expliquer le pivot du projet vers l'analyse du trafic aeroportuaire
 - [ ] Expliquer pourquoi Spark n'est pas utilise dans ce projet
 - [ ] Ajouter des captures Airflow
 - [ ] Ajouter des captures Snowflake
