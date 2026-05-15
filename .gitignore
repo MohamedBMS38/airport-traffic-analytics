@@ -19,3 +19,7 @@ Thumbs.db
 
 # Docker / local runtime
 *.log
+
+# Local learning / working notes
+OPENSKY_API_NOTES.md
+PYTHON_SYNTAX_TEMPLATES.md

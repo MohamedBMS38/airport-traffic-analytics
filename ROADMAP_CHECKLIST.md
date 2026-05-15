@@ -15,9 +15,9 @@ Regle de travail : chaque case doit correspondre a une action que je comprends e
 - [x] Valider le Compose avec `docker compose config`
 - [x] Creer/verifier les dossiers montes par Docker : `dags/`, `scripts/`, `data/`, `logs/`, `plugins/`
 - [ ] Nettoyer le fichier `.env` si besoin
-- [ ] Creer un fichier `.env.example` sans secrets reels
-- [ ] Remplir `requirements.txt` avec les dependances utiles
-- [ ] Ajouter un `.gitignore` adapte au projet
+- [x] Creer un fichier `.env.example` sans secrets reels
+- [x] Remplir `requirements.txt` avec les dependances utiles
+- [x] Ajouter un `.gitignore` adapte au projet
 
 ## Phase 1 bis - Git et GitHub
 
@@ -51,33 +51,33 @@ Regle de travail : chaque case doit correspondre a une action que je comprends e
 - [x] Creer un DAG de test Airport Traffic avec trois tasks : start, extract, end
 - [x] Verifier le graph du DAG dans l'interface Airflow
 - [x] Verifier les logs des trois tasks
-- [ ] Revoir les noms de `dag_id` pour eviter les doublons
+- [x] Revoir les noms de `dag_id` pour eviter les doublons
 - [ ] Comprendre la difference entre `Audit Log` et logs de task
 
 ## Phase 3 - Ingestion OpenSky Arrivals / Departures
 
-- [ ] Ajouter `requests` dans `requirements.txt`
-- [ ] Comprendre le role de `requests.get()`
-- [ ] Explorer la documentation OpenSky `arrivals by airport`
-- [ ] Explorer la documentation OpenSky `departures by airport`
-- [ ] Choisir un premier aeroport test avec code ICAO, par exemple `LFPG`
-- [ ] Choisir une fenetre de temps passee pour eviter les donnees non disponibles du jour
-- [ ] Comprendre les parametres `airport`, `begin`, `end`
-- [ ] Creer le fichier `dags/opensky_airport_traffic_test_dag.py`
-- [ ] Creer une fonction `extract_airport_arrivals`
-- [ ] Construire l'URL `/flights/arrival`
-- [ ] Appeler l'endpoint arrivals depuis une task Airflow
-- [ ] Verifier le code HTTP de la reponse
-- [ ] Gerer le cas HTTP `200`
-- [ ] Gerer le cas HTTP `404` comme absence possible de vols
-- [ ] Convertir la reponse en JSON
-- [ ] Compter le nombre d'arrivees recuperees
-- [ ] Logger un resume clair dans Airflow
-- [ ] Tester une extraction departures avec `/flights/departure`
-- [ ] Comparer la structure des reponses arrivals et departures
-- [ ] Ajouter un timeout a chaque appel API
-- [ ] Tester le DAG depuis l'interface Airflow
-- [ ] Lire les logs de l'extraction
+- [x] Ajouter `requests` dans `requirements.txt`
+- [x] Comprendre le role de `requests.get()`
+- [x] Explorer la documentation OpenSky `arrivals by airport`
+- [x] Explorer la documentation OpenSky `departures by airport`
+- [x] Choisir un premier aeroport test avec code ICAO, par exemple `LFPG`
+- [x] Choisir une fenetre de temps passee pour eviter les donnees non disponibles du jour
+- [x] Comprendre les parametres `airport`, `begin`, `end`
+- [x] Creer le fichier `dags/opensky_airport_traffic_test_dag.py`
+- [x] Creer une fonction `extract_airport_arrivals`
+- [x] Construire l'URL `/flights/arrival`
+- [x] Appeler l'endpoint arrivals depuis une task Airflow avec authentification Bearer
+- [x] Verifier le code HTTP de la reponse
+- [x] Gerer le cas HTTP `200`
+- [x] Gerer le cas HTTP `404` comme absence possible de vols
+- [x] Convertir la reponse en JSON
+- [x] Compter le nombre d'arrivees recuperees
+- [x] Logger un resume clair dans Airflow
+- [x] Tester une extraction departures avec `/flights/departure`
+- [x] Comparer la structure des reponses arrivals et departures
+- [x] Ajouter un timeout a chaque appel API
+- [x] Tester le DAG depuis l'interface Airflow
+- [x] Lire les logs de l'extraction
 
 ## Phase 4 - Snowflake Bronze
 
