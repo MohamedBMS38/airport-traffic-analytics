@@ -92,8 +92,8 @@ Regle de travail : chaque case doit correspondre a une action que je comprends e
 - [x] Ajouter les variables Snowflake dans `.env`
 - [x] Ajouter les variables Snowflake dans `.env.example` sans secrets
 - [x] Transmettre les variables Snowflake aux conteneurs Airflow via Docker Compose
-- [ ] Creer une image Airflow custom avec `Dockerfile`
-- [ ] Installer/configurer le connecteur Snowflake Python
+- [x] Creer une image Airflow custom avec `Dockerfile`
+- [x] Installer/configurer le connecteur Snowflake Python
 - [x] Tester une connexion Snowflake depuis Airflow
 - [x] Creer les tables Bronze pour stocker les reponses OpenSky brutes
 - [ ] Charger une reponse arrivals/departures brute dans Bronze
