@@ -1,6 +1,4 @@
-#Ce fichier définit un DAG Airflow de test pour interroger l’API OpenSky sur les arrivées à l’aéroport Paris Charles de Gaulle (LFPG).
-#Il calcule automatiquement une fenêtre passée d’une heure, appelle l’endpoint /flights/arrival, puis écrit dans les logs Airflow le code HTTP, l’URL appelée et le nombre d’arrivées récupérées.
-#Le but est de valider l’appel API et la logique de fenêtre temporelle avant de stocker les données dans Snowflake Bronze.
+"""Test DAG for extracting OpenSky airport arrivals and departures."""
 
 from airflow import DAG
 from airflow.operators.python import PythonOperator
@@ -8,8 +6,9 @@ from airflow.utils.dates import days_ago
 
 from datetime import datetime, timedelta, timezone
 import logging
-import requests
 import os
+
+import requests
 
 
 # URL de base de l'API OpenSky.
@@ -22,6 +21,8 @@ OPENSKY_TOKEN_URL = "https://auth.opensky-network.org/auth/realms/opensky-networ
 # Code ICAO de Paris Charles de Gaulle.
 # OpenSky attend un code ICAO comme LFPG, pas un code IATA comme CDG.
 AIRPORT_ICAO = "LFPG"
+VALID_FLIGHT_TYPES = {"arrival", "departure"}
+
 
 def get_opensky_token():
     client_id = os.getenv("OPENSKY_CLIENT_ID")
@@ -30,17 +31,20 @@ def get_opensky_token():
     if not client_id or not client_secret:
         raise ValueError("OpenSky credentials are missing from environment variables")
 
-    response = requests.post(
-        OPENSKY_TOKEN_URL,
-        data={
-            "grant_type": "client_credentials",
-            "client_id": client_id,
-            "client_secret": client_secret,
-        },
-        timeout=30,
-    )
-
-    response.raise_for_status()
+    try:
+        response = requests.post(
+            OPENSKY_TOKEN_URL,
+            data={
+                "grant_type": "client_credentials",
+                "client_id": client_id,
+                "client_secret": client_secret,
+            },
+            timeout=30,
+        )
+        response.raise_for_status()
+    except requests.RequestException:
+        logging.error("Échec de récupération du token OpenSky.")
+        raise
 
     token_data = response.json()
     return token_data["access_token"]
@@ -59,6 +63,9 @@ def build_time_window():
 
     
 def extract_airport_flights(flight_type):
+    if flight_type not in VALID_FLIGHT_TYPES:
+        raise ValueError(f"Invalid flight_type: {flight_type}")
+
     begin, end = build_time_window()
 
     url = f"{OPENSKY_BASE_URL}/flights/{flight_type}"
@@ -82,7 +89,7 @@ def extract_airport_flights(flight_type):
         timeout=30,
     )
 
-        # Logs techniques utiles pour verifier l'appel sans afficher toute la reponse.
+    # Logs techniques utiles pour verifier l'appel sans afficher toute la reponse.
     logging.info("Code HTTP reçu : %s", response.status_code)
     logging.info("URL appelée : %s", response.url)
 

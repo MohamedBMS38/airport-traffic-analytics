@@ -88,11 +88,12 @@ Regle de travail : chaque case doit correspondre a une action que je comprends e
 - [ ] Creer une database projet
 - [ ] Creer les schemas `BRONZE`, `SILVER`, `GOLD`
 - [ ] Comprendre le type Snowflake `VARIANT`
+- [ ] Creer une table Bronze par endpoint : arrivals raw et departures raw
 - [ ] Ajouter les variables Snowflake dans `.env`
 - [ ] Ajouter les variables Snowflake dans `.env.example` sans secrets
 - [ ] Installer/configurer le connecteur Snowflake Python
 - [ ] Tester une connexion Snowflake depuis Airflow
-- [ ] Creer une table Bronze pour stocker les reponses OpenSky brutes
+- [ ] Creer les tables Bronze pour stocker les reponses OpenSky brutes
 - [ ] Charger une reponse arrivals/departures brute dans Bronze
 - [ ] Ajouter un timestamp d'ingestion
 - [ ] Verifier les lignes dans Snowflake
