@@ -81,19 +81,21 @@ Regle de travail : chaque case doit correspondre a une action que je comprends e
 
 ## Phase 4 - Snowflake Bronze
 
-- [ ] Creer ou verifier le compte Snowflake
-- [ ] Creer un warehouse dedie au projet
-- [ ] Configurer `AUTO_SUSPEND`
-- [ ] Configurer `AUTO_RESUME`
-- [ ] Creer une database projet
-- [ ] Creer les schemas `BRONZE`, `SILVER`, `GOLD`
-- [ ] Comprendre le type Snowflake `VARIANT`
-- [ ] Creer une table Bronze par endpoint : arrivals raw et departures raw
-- [ ] Ajouter les variables Snowflake dans `.env`
-- [ ] Ajouter les variables Snowflake dans `.env.example` sans secrets
+- [x] Creer ou verifier le compte Snowflake
+- [x] Creer un warehouse dedie au projet
+- [x] Configurer `AUTO_SUSPEND`
+- [x] Configurer `AUTO_RESUME`
+- [x] Creer une database projet
+- [x] Creer les schemas `BRONZE`, `SILVER`, `GOLD`
+- [x] Comprendre le type Snowflake `VARIANT`
+- [x] Creer une table Bronze par endpoint : arrivals raw et departures raw
+- [x] Ajouter les variables Snowflake dans `.env`
+- [x] Ajouter les variables Snowflake dans `.env.example` sans secrets
+- [x] Transmettre les variables Snowflake aux conteneurs Airflow via Docker Compose
+- [ ] Creer une image Airflow custom avec `Dockerfile`
 - [ ] Installer/configurer le connecteur Snowflake Python
-- [ ] Tester une connexion Snowflake depuis Airflow
-- [ ] Creer les tables Bronze pour stocker les reponses OpenSky brutes
+- [x] Tester une connexion Snowflake depuis Airflow
+- [x] Creer les tables Bronze pour stocker les reponses OpenSky brutes
 - [ ] Charger une reponse arrivals/departures brute dans Bronze
 - [ ] Ajouter un timestamp d'ingestion
 - [ ] Verifier les lignes dans Snowflake
