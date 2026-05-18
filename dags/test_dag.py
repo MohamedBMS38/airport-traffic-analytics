@@ -1,14 +1,19 @@
+"""Premier DAG de test pour comprendre PythonOperator et les dependances."""
+
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 from airflow.utils.dates import days_ago
+
 import logging
 
-def goodbye(): 
+
+def goodbye():
     logging.info("aurevoiiiir")
 
 
 def greeting():
     logging.info("bonjouuuur")
+
 
 dag = DAG(
     dag_id="simple_dag",
@@ -23,11 +28,11 @@ greeting_task = PythonOperator(
     dag=dag,
 )
 
-
 aurevoir_task = PythonOperator(
     task_id="aurevoir_task",
     python_callable=goodbye,
     dag=dag,
 )
 
+# Airflow execute greeting_task avant aurevoir_task.
 greeting_task >> aurevoir_task

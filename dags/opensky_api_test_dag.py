@@ -1,25 +1,27 @@
+"""DAG de test simple pour valider un appel HTTP vers OpenSky."""
+
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 from airflow.utils.dates import days_ago
 
 import logging
+
 import requests
 
 
-# URL de l'endpoint OpenSky qui retourne l'etat actuel des avions en vol.
+# Endpoint public utilise au debut du projet pour valider requests + Airflow.
 OPENSKY_URL = "https://opensky-network.org/api/states/all"
 
 
 def extract_opensky_data():
-    # Point de depart visible dans les logs Airflow pour suivre l'execution.
-    logging.info("Début extraction OpenSky")
+    # Message de depart visible dans les logs Airflow.
+    logging.info("Debut extraction OpenSky")
 
-    # Appel HTTP vers l'API OpenSky.
     # Le timeout evite que la task reste bloquee si l'API ne repond pas.
     response = requests.get(OPENSKY_URL, timeout=30)
 
-    # Pour l'instant, on log uniquement le statut HTTP afin de valider la connexion.
-    logging.info("Code HTTP reçu : %s", response.status_code)
+    # Pour ce DAG de test, le code HTTP suffit a valider la connexion.
+    logging.info("Code HTTP recu : %s", response.status_code)
 
 
 dag = DAG(

@@ -1,17 +1,23 @@
+"""DAG pedagogique pour comprendre l'ordre d'execution des tasks Airflow."""
+
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 from airflow.utils.dates import days_ago
+
 import logging
 
 
-def start_pipeline(): 
-    logging.info("Début du pipeline Flight Tracker")
+def start_pipeline():
+    logging.info("Debut du pipeline Flight Tracker")
+
 
 def extract_data():
-    logging.info("Extraction des données OpenSky simulée")
+    logging.info("Extraction des donnees OpenSky simulee")
+
 
 def end_pipeline():
     logging.info("Fin du pipeline Flight Tracker")
+
 
 dag = DAG(
     dag_id="flight_tracker_test_dag",
@@ -38,4 +44,5 @@ end_task = PythonOperator(
     dag=dag,
 )
 
+# La fleche impose l'ordre : start_task, puis extract_task, puis end_task.
 start_task >> extract_task >> end_task

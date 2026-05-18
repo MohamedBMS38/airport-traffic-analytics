@@ -1,34 +1,34 @@
 services:
-  # --- Base de données de métadonnées ---
+  # --- Base de donnees de metadonnees Airflow ---
   postgres:
     image: postgres:15
     container_name: airflow-postgres
     restart: always
     environment:
-      # Injection des variables d'environnement pour la sécurité des identifiants
+      # Identifiants lus depuis .env pour eviter de les mettre en dur dans le code.
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
     volumes:
-      # Montage d'un volume nommé pour garantir la persistance des données du catalogue
+      # Volume nomme : les metadonnees Airflow survivent aux redemarrages des conteneurs.
       - postgres_data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
     healthcheck:
-      # Vérification de la disponibilité réelle du service avant de libérer les dépendances
+      # Airflow ne demarre que lorsque PostgreSQL accepte vraiment les connexions.
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 10s
       timeout: 5s
       retries: 5
 
-  # --- Unité d'initialisation du schéma Airflow ---
+  # --- Initialisation du schema Airflow et creation de l'utilisateur admin ---
   airflow-init:
     build: .
     image: airport-traffic-airflow:latest
     container_name: airflow-init
     depends_on:
       postgres:
-        condition: service_healthy # Attente du statut "Healthy" de la base de données
+        condition: service_healthy
     environment:
       AIRFLOW__CORE__LOAD_EXAMPLES: "False"
       AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
@@ -38,16 +38,16 @@ services:
       airflow db init && 
       airflow db migrate && 
       airflow users create --username ${AIRFLOW_ADMIN_USER} --firstname ${AIRFLOW_ADMIN_FIRSTNAME} --lastname ${AIRFLOW_ADMIN_LASTNAME} --role Admin --email ${AIRFLOW_ADMIN_EMAIL} --password ${AIRFLOW_ADMIN_PASSWORD} &&
-      echo 'Initialisation de la base de données terminée.'"
+      echo 'Initialisation de la base de donnees terminee.'"
 
-  # --- Serveur Web (Interface utilisateur) ---
+  # --- Interface web Airflow ---
   airflow-webserver:
     image: airport-traffic-airflow:latest
     container_name: airflow-webserver
     restart: always
     depends_on:
       airflow-init:
-        condition: service_completed_successfully # S'assure que le schéma est prêt avant le lancement de l'UI
+        condition: service_completed_successfully
     environment:
       SNOWFLAKE_ACCOUNT: ${SNOWFLAKE_ACCOUNT}
       SNOWFLAKE_USER: ${SNOWFLAKE_USER}
@@ -61,7 +61,7 @@ services:
       AIRFLOW__CORE__LOAD_EXAMPLES: "False"
       AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
     volumes:
-      # Synchronisation des répertoires locaux avec l'environnement de conteneurisation
+      # Les dossiers locaux sont montes dans Airflow pour developper sans reconstruire l'image.
       - ./dags:/opt/airflow/dags
       - ./scripts:/opt/airflow/scripts
       - ./logs:/opt/airflow/logs
@@ -71,7 +71,7 @@ services:
       - "8080:8080"
     command: webserver
 
-  # --- Planificateur (Moteur d'exécution) ---
+  # --- Scheduler Airflow : service qui planifie et lance les tasks ---
   airflow-scheduler:
     image: airport-traffic-airflow:latest
     container_name: airflow-scheduler
@@ -99,6 +99,6 @@ services:
       - ./data:/opt/airflow/data
     command: scheduler
 
-# Définition des ressources de stockage persistantes
+# Stockage persistant utilise par PostgreSQL.
 volumes:
   postgres_data:
