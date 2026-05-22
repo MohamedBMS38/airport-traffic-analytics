@@ -1,10 +1,10 @@
 """DAG de test pour extraire les arrivees et departs OpenSky d'un aeroport."""
 
 from airflow import DAG
-from airflow.operators.python import PythonOperator
+from airflow.operators.python import PythonOperator, get_current_context
 from airflow.utils.dates import days_ago
 
-from datetime import datetime, timedelta, timezone
+from datetime import timedelta, timezone
 import logging
 import os
 import requests
@@ -25,11 +25,10 @@ OPENSKY_TOKEN_URL = "https://auth.opensky-network.org/auth/realms/opensky-networ
 AIRPORT_ICAO = "LFPG"
 VALID_FLIGHT_TYPES = {"arrival", "departure"}
 
-# Fenetre fixe temporaire pour stabiliser les tests manuels.
-# Elle sera remplacee par une fenetre dynamique quand le chargement Bronze sera valide.
-USE_FIXED_TEST_WINDOW = True
-TEST_WINDOW_BEGIN_TS = 1778962333
-TEST_WINDOW_END_TS = 1778965933
+# Fenetre dynamique stable : elle depend de la date logique Airflow, pas de l'heure actuelle.
+# Ainsi, un retry relance exactement la meme requete OpenSky.
+WINDOW_DELAY_DAYS = 2
+WINDOW_DURATION_HOURS = 1
 
 # Les appels API peuvent echouer temporairement.
 # Airflow retentera la task avant de la considerer definitivement en erreur.
@@ -67,13 +66,14 @@ def get_opensky_token():
 
 
 def build_time_window():
-    if USE_FIXED_TEST_WINDOW:
-        return TEST_WINDOW_BEGIN_TS, TEST_WINDOW_END_TS
+    context = get_current_context()
+    logical_date = context["logical_date"].astimezone(timezone.utc)
 
     # Les donnees arrivals/departures ne sont pas garanties en temps reel.
     # On interroge donc une fenetre passee pour augmenter les chances d'obtenir des resultats.
-    end_time = datetime.now(timezone.utc) - timedelta(days=2)
-    begin_time = end_time - timedelta(hours=1)
+    end_time = logical_date.replace(minute=0, second=0, microsecond=0)
+    end_time = end_time - timedelta(days=WINDOW_DELAY_DAYS)
+    begin_time = end_time - timedelta(hours=WINDOW_DURATION_HOURS)
 
     # OpenSky attend begin/end sous forme de timestamps Unix en secondes.
     return int(begin_time.timestamp()), int(end_time.timestamp())
@@ -90,6 +90,7 @@ def get_snowflake_connection():
         warehouse=os.getenv("SNOWFLAKE_WAREHOUSE"),
         database=os.getenv("SNOWFLAKE_DATABASE"),
         schema=os.getenv("SNOWFLAKE_SCHEMA"),
+        autocommit=False,
     )
 
     return conn
@@ -145,17 +146,18 @@ def load_flights_to_snowflake(flight_type, airport_icao, begin, end, records):
                 END_TS,
                 RAW_RECORD
             )
-            VALUES (
+            SELECT
                 %s,
                 CURRENT_TIMESTAMP(),
                 %s,
                 %s,
                 %s,
                 PARSE_JSON(%s)
-            )
         """
 
-        cursor.executemany(insert_sql, rows)
+        for row in rows:
+            cursor.execute(insert_sql, row)
+
         conn.commit()
 
         logging.info(
@@ -163,6 +165,11 @@ def load_flights_to_snowflake(flight_type, airport_icao, begin, end, records):
             len(rows),
             table_name,
         )
+
+    except Exception:
+        conn.rollback()
+        logging.exception("Echec du chargement Bronze Snowflake. Transaction annulee.")
+        raise
 
     finally:
         if cursor:
